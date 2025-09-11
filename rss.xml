@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>KucingFusion</title><description>No description</description><link>https://kucingfusion.github.io/</link><language>zh_CN</language><item><title>基于海康SDK的工业产品标准检测 🎯</title><link>https://kucingfusion.github.io/posts/haikang/</link><guid isPermaLink="true">https://kucingfusion.github.io/posts/haikang/</guid><description>项目设计了一套工业直线导轨零件尺寸测量系统，利用机器视觉实现快速、精准、可视化检测 😎。</description><pubDate>Fri, 20 Sep 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;本项目设计了一套&lt;strong&gt;工业直线导轨零件尺寸测量系统&lt;/strong&gt;，利用机器视觉实现快速、精准、可视化检测 😎。
+项目地址：https://github.com/KucingFusion/IndustryCheck
+系统环境：&lt;strong&gt;VSCode + Qt + CMake&lt;/strong&gt;
+摄像头：海康（所以 SDK 必须有！）&lt;/p&gt;
+&lt;p&gt;&amp;lt;details&amp;gt;
+&amp;lt;summary&amp;gt;📂 目录（点击展开）&amp;lt;/summary&amp;gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;#%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0-%EF%B8%8F&quot;&gt;系统概述 🖼️&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#%E7%A1%AC%E4%BB%B6%E5%B1%95%E7%A4%BA-&quot;&gt;硬件展示 🤫&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#%E8%BD%AF%E4%BB%B6%E6%80%BB%E4%BD%93%E6%96%B9%E6%A1%88-&quot;&gt;软件总体方案 💻&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;#1%EF%B8%8F%E2%83%A3-%E5%9B%BE%E5%83%8F%E9%87%87%E9%9B%86-&quot;&gt;1️⃣ 图像采集 📸&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#2%EF%B8%8F%E2%83%A3-%E7%B3%BB%E7%BB%9F%E6%A0%87%E5%AE%9A-&quot;&gt;2️⃣ 系统标定 🎯&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#3%EF%B8%8F%E2%83%A3-%E5%9B%BE%E5%83%8F%E9%A2%84%E5%A4%84%E7%90%86-%EF%B8%8F&quot;&gt;3️⃣ 图像预处理 🖌️&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#4%EF%B8%8F%E2%83%A3-%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B--%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96-%EF%B8%8F%EF%B8%8F&quot;&gt;4️⃣ 边缘检测 &amp;amp; 特征提取 🕵️‍♂️&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#5%EF%B8%8F%E2%83%A3-%E9%9B%B6%E4%BB%B6%E5%8F%82%E6%95%B0%E6%B5%8B%E9%87%8F--%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8-&quot;&gt;5️⃣ 零件参数测量 &amp;amp; 数据存储 📊&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#%E5%B0%8F%E7%BB%93-&quot;&gt;小结 💡&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;lt;/details&amp;gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;系统概述 🖼️&lt;/h2&gt;
+&lt;p&gt;整套硬件示意图，忽略脏乱差的背景，谢谢：&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/模拟示意图.png&quot; width=&quot;400&quot; alt=&quot;系统模拟示意图&quot;&amp;gt;&lt;/p&gt;
+&lt;p&gt;待测产品示意图，（孔径 + 边距）：&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/待测产品.png&quot; width=&quot;800&quot; alt=&quot;待测产品示意图&quot;&amp;gt;&lt;/p&gt;
+&lt;p&gt;实物产品，厂家发来的时候生锈了😡😡😡：&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/产品.jpg&quot; width=&quot;600&quot; alt=&quot;待测产品实物&quot;&amp;gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;硬件展示 🤫&lt;/h2&gt;
+&lt;p&gt;野生的海康相机 &amp;amp; 镜头：&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/相机.jpg&quot; width=&quot;250&quot; alt=&quot;海康相机&quot;&amp;gt;
+&amp;lt;img src=&quot;/images/Hikvsion/镜头.png&quot; width=&quot;250&quot; alt=&quot;镜头&quot;&amp;gt;&lt;/p&gt;
+&lt;p&gt;相机采集流程（SDK 示例），PS一句海康SDK真难用，好多实例都弃用了也不更新🤢🤢🤢🤢🤢🤢🤢🤢：&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/相机流程.png&quot; width=&quot;800&quot; alt=&quot;相机采集流程&quot;&amp;gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h2&gt;软件总体方案 💻&lt;/h2&gt;
+&lt;p&gt;软件流程示意：&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/软件.png&quot; width=&quot;800&quot; alt=&quot;软件流程示意图&quot;&amp;gt;&lt;/p&gt;
+&lt;p&gt;软件模块说明：&lt;/p&gt;
+&lt;h3&gt;1️⃣ 图像采集 📸&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;初始化 SDK，枚举设备&lt;/li&gt;
+&lt;li&gt;选择采集模式：连续 / 单帧 / 软件触发&lt;/li&gt;
+&lt;li&gt;UI 按钮控制开始/停止采集&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;void init_MvSdk();       // 初始化SDK
+void release_MvSdk();    // 释放SDK
+void enum_Device();      // 枚举设备
+void enum_captureMode(); // 枚举采集模式
+void enum_triggerMode(); // 枚举触发模式
+
+int open_Device();       // 打开设备
+int close_Device();      // 关闭设备
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2️⃣ 系统标定 🎯&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;相机标定&lt;/strong&gt;：获取内参、畸变系数，对棋盘格图像校正畸变&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;像素当量标定&lt;/strong&gt;：建立像素尺寸与物理尺寸转换关系
+拿棋盘标定，网上都有原理
+&amp;lt;img src=&quot;./棋盘.png&quot; width=&quot;300&quot; alt=&quot;棋盘标定&quot;&amp;gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;3️⃣ 图像预处理 🖌️&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;功能&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;th&gt;图片示意&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ROI提取 &amp;amp; 模板匹配&lt;/td&gt;
+&lt;td&gt;缩小处理区域，加快算法速度&lt;/td&gt;
+&lt;td&gt;&amp;lt;img src=&quot;/images/Hikvsion/模板匹配.png&quot; width=&quot;500&quot; alt=&quot;模板匹配&quot;&amp;gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;中值滤波&lt;/td&gt;
+&lt;td&gt;不同滤波算法对比，选择最佳&lt;/td&gt;
+&lt;td&gt;&amp;lt;img src=&quot;/images/Hikvsion/中值滤波.png&quot; width=&quot;500&quot; alt=&quot;中值滤波&quot;&amp;gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;二值化&lt;/td&gt;
+&lt;td&gt;简单阈值法，凸显轮廓&lt;/td&gt;
+&lt;td&gt;&amp;lt;img src=&quot;/images/Hikvsion/二值化.png&quot; width=&quot;500&quot; alt=&quot;二值化&quot;&amp;gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;形态学操作&lt;/td&gt;
+&lt;td&gt;闭运算去噪点、填小孔洞&lt;/td&gt;
+&lt;td&gt;&amp;lt;img src=&quot;/images/Hikvsion/形态学操作.png&quot; width=&quot;500&quot; alt=&quot;形态学处理&quot;&amp;gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3&gt;4️⃣ 边缘检测 &amp;amp; 特征提取 🕵️‍♂️&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;像素级边缘检测&lt;/strong&gt;：粗定位&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;亚像素级边缘检测&lt;/strong&gt;：精准定位
+&amp;lt;img src=&quot;/images/Hikvsion/边缘检测算子对比.png&quot; width=&quot;500&quot; alt=&quot;边缘检测算子对比&quot;&amp;gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;特征提取&lt;/strong&gt;：最小二乘法拟合直线/圆，获取圆心、半径、线圆间像素距离&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/最小二乘法.png&quot; width=&quot;300&quot; alt=&quot;最小二乘法拟合&quot;&amp;gt;&lt;/p&gt;
+&lt;h3&gt;5️⃣ 零件参数测量 &amp;amp; 数据存储 📊&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;利用像素当量转换为物理尺寸&lt;/li&gt;
+&lt;li&gt;测量值显示在 Qt 界面：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/qt.png&quot; width=&quot;700&quot; alt=&quot;Qt界面&quot;&amp;gt;&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/qt1.png&quot; width=&quot;700&quot; alt=&quot;Qt界面1&quot;&amp;gt;&lt;/p&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/qt2.png&quot; width=&quot;700&quot; alt=&quot;Qt界面2&quot;&amp;gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;测量结果对比图：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;lt;img src=&quot;/images/Hikvsion/测量对比图.jpg&quot; width=&quot;800&quot; alt=&quot;测量对比图&quot;&amp;gt;&lt;/p&gt;
+&lt;h2&gt;小结 💡&lt;/h2&gt;
+&lt;p&gt;整个系统覆盖从&lt;strong&gt;图像采集 → 标定 → 预处理 → 特征提取 → 测量输出&lt;/strong&gt;的全流程。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;快速&lt;/strong&gt; ✅&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;精准&lt;/strong&gt; ✅&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可视化&lt;/strong&gt; ✅&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;总结一句话：用机器视觉，我是懒逼 😏。&lt;/p&gt;
+&lt;/blockquote&gt;
+</content:encoded></item></channel></rss>
